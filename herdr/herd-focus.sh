@@ -46,4 +46,12 @@ fi
 
 [ -n "$TERMINAL_CLASS" ] || exit 0
 command -v hyprctl >/dev/null 2>&1 || exit 0
-hyprctl dispatch focuswindow "class:$TERMINAL_CLASS" >/dev/null 2>&1 || true
+
+# Hyprland 0.56 replaced string dispatchers with a Lua API. The form every guide
+# still documents — `hyprctl dispatch focuswindow class:X` — does not fail
+# loudly there; it returns 7 with a Lua parse error, so a script that ignores
+# the exit code raises nothing and reports success. Try the new form first and
+# fall back, rather than picking one and being wrong for half the installs.
+hyprctl dispatch "hl.dsp.focus({window=\"class:$TERMINAL_CLASS\"})" >/dev/null 2>&1 \
+  || hyprctl dispatch focuswindow "class:$TERMINAL_CLASS" >/dev/null 2>&1 \
+  || true

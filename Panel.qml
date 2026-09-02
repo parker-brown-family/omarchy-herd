@@ -245,7 +245,11 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    text: ""
+    // A bell, and not a decorative choice: the bellwether is the sheep that
+    // wears one. It is also verified present in the bar's Nerd Font — the
+    // Font Awesome ranges are not, and an absent glyph leaves a blank slot
+    // on the bar with no error anywhere to explain it.
+    text: "󰂚"
     active: root.blocked > 0
     tooltipText: root.blocked > 0
       ? (root.blocked === 1 ? "1 agent is waiting on you"

@@ -46,12 +46,17 @@ BarWidget {
   readonly property int finished: tally("done")
   readonly property int resting: Math.max(0, agents.length - blocked - working - finished)
 
-  // Badges match Terminal Delight's agent wall so the two read alike.
-  // herdr has no error state — it folds rate-limit and API failures into
+  // Badges read like Terminal Delight's agent wall. Not the same codepoints:
+  // U+23F8 ⏸, which TD uses for blocked, carries Emoji_Presentation, so the
+  // bar's font stack substitutes a colour emoji and it lands as a solid blob
+  // at bar size. U+2016 ‖ is a plain text glyph, says the same thing, and
+  // renders. ▶ ✓ · were checked on the real bar and are fine as they are.
+  //
+  // herdr has no error state — it folds rate limits and API failures into
   // `unknown` — so nothing here claims one. Unknown rests with idle.
   readonly property string label: {
     var parts = []
-    if (blocked > 0) parts.push("⏸ " + blocked)
+    if (blocked > 0) parts.push("‖ " + blocked)
     if (working > 0) parts.push("▶ " + working)
     if (finished > 0) parts.push("✓ " + finished)
     if (showIdle && resting > 0) parts.push("· " + resting)

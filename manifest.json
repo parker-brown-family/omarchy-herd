@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "brownfamilysports.herd",
+  "name": "Herd",
+  "version": "0.1.0",
+  "author": "Parker Brown",
+  "license": "MIT",
+  "description": "Which coding agent under herdr needs you, on the Omarchy bar",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Herd",
+    "description": "One chip: how many agents are working, and how many are blocked on you. Click to jump to the one that is stuck.",
+    "category": "AI",
+    "allowMultiple": false,
+    "defaults": {
+      "hideWhenEmpty": true,
+      "showIdle": false,
+      "socketPath": ""
+    },
+    "schema": [
+      {
+        "key": "hideWhenEmpty",
+        "type": "boolean",
+        "label": "Hide when no agents are running",
+        "defaultValue": true
+      },
+      {
+        "key": "showIdle",
+        "type": "boolean",
+        "label": "Count idle agents",
+        "defaultValue": false,
+        "description": "Idle agents are at rest and need nothing. Off by default so the chip only speaks when there is something to say."
+      },
+      {
+        "key": "socketPath",
+        "type": "string",
+        "label": "herdr socket path",
+        "defaultValue": "",
+        "description": "Leave empty for the default session socket (~/.config/herdr/herdr.sock). Set this to watch a named session instead; `herdr session list` prints the path."
+      }
+    ]
+  }
+}

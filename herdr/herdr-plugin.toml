@@ -1,0 +1,34 @@
+id = "brownfamilysports.herd"
+name = "Herd"
+version = "0.1.0"
+min_herdr_version = "0.7.0"
+description = "Publish herdr agent state to the Omarchy bar"
+platforms = ["linux"]
+
+# A fresh snapshot whenever a server takes over — a restart, or a live handoff
+# during `herdr update`. Without this the bar would show whatever the last
+# server left behind until the next status change happened to fire.
+[[startup]]
+command = ["sh", "herd-sync.sh"]
+
+[[events]]
+on = "pane.agent_status_changed"
+command = ["sh", "herd-sync.sh"]
+
+[[events]]
+on = "pane.agent_detected"
+command = ["sh", "herd-sync.sh"]
+
+[[events]]
+on = "pane.exited"
+command = ["sh", "herd-sync.sh"]
+
+[[events]]
+on = "pane.closed"
+command = ["sh", "herd-sync.sh"]
+
+[[actions]]
+id = "focus-blocked"
+title = "Focus the blocked agent"
+contexts = ["workspace"]
+command = ["sh", "herd-focus.sh"]

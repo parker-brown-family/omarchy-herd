@@ -1,0 +1,20 @@
+#!/bin/sh
+# Records dispatch calls, and can pretend to be an older Hyprland.
+#
+# HERD_STUB_HYPR=new  (default) the Lua dispatcher works
+# HERD_STUB_HYPR=old  the Lua form fails the way 0.55 and earlier do, so the
+#                     fallback path gets exercised
+set -eu
+printf '%s\n' "$*" >>"${HERD_STUB_LOG:-/dev/null}"
+
+case "${HERD_STUB_HYPR:-new}" in
+  old)
+    case "$*" in
+      *hl.dsp.focus*) exit 1 ;;
+      *) exit 0 ;;
+    esac
+    ;;
+  *)
+    exit 0
+    ;;
+esac

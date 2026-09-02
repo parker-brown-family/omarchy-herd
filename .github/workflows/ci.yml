@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+      # The plugin's scripts are POSIX sh, and the CI shell is not the shell
+      # they will run under. Check them as sh so a bashism cannot pass here and
+      # fail on a dash-based /bin/sh.
+      - name: Lint the shell
+        run: shellcheck -s sh herdr/herd-sync.sh herdr/herd-focus.sh tests/run.sh tests/stubs/*
+
+      - name: Syntax-check as POSIX sh
+        run: |
+          for f in herdr/herd-sync.sh herdr/herd-focus.sh tests/run.sh tests/stubs/*; do
+            sh -n "$f"
+          done
+
+      - name: Run the tests
+        run: sh tests/run.sh
+
+      # A suite that cannot fail proves nothing. Break the pane-id validation
+      # and confirm the tests notice, so a future refactor that quietly guts
+      # them shows up here rather than in someone's shell history.
+      - name: Prove the tests can fail
+        run: |
+          cp herdr/herd-focus.sh /tmp/herd-focus.orig
+          sed -i 's/^valid_token "\$target" || exit 0/: # mutation/' herdr/herd-focus.sh
+          if sh tests/run.sh >/dev/null 2>&1; then
+            echo "the suite passed with the validation removed; it is not testing it"
+            exit 1
+          fi
+          cp /tmp/herd-focus.orig herdr/herd-focus.sh
+          echo "the suite catches the mutation"

@@ -1,0 +1,5 @@
+#!/bin/sh
+# Records every notification the sync script sends, one per line, so a test can
+# assert on how many rang and what they said.
+set -eu
+printf '%s\n' "$*" >>"${HERD_NOTIFY_LOG:-/dev/null}"

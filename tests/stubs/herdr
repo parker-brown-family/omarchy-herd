@@ -1,0 +1,58 @@
+#!/bin/sh
+# Stand-in for the herdr CLI.
+#
+# HERD_STUB_MODE picks the response shape:
+#   ok       a four-agent list in the exact envelope the real binary emits
+#   empty    a valid response with no agents
+#   down     the server_not_running error, on stderr, exit 1
+#   garbage  non-JSON on stdout, exit 0
+#
+# `agent focus` appends its target to $HERD_STUB_LOG so a test can see what
+# the script actually asked for.
+set -eu
+
+case "${1:-} ${2:-}" in
+  "agent list")
+    case "${HERD_STUB_MODE:-ok}" in
+      down)
+        echo '{"id":"cli:agent:list","error":{"code":"server_not_running","message":"no herdr server"}}' >&2
+        exit 1
+        ;;
+      garbage)
+        echo 'herdr: something went sideways'
+        exit 0
+        ;;
+      empty)
+        echo '{"id":"cli:agent:list","result":{"type":"agent_list","agents":[]}}'
+        exit 0
+        ;;
+      *)
+        cat <<'JSON'
+{"id":"cli:agent:list","result":{"type":"agent_list","agents":[
+ {"terminal_id":"t1","pane_id":"w1:p1","workspace_id":"w1","tab_id":"w1:t1",
+  "agent":"claude","display_agent":"Claude Code","title":"omarchy-herd",
+  "agent_status":"blocked","focused":false,"revision":7,"state_change_seq":3},
+ {"terminal_id":"t2","pane_id":"w1:p2","workspace_id":"w1","tab_id":"w1:t1",
+  "agent":"codex","display_agent":"Codex","title":"addev docs",
+  "agent_status":"working","focused":true,"revision":4,"state_change_seq":9},
+ {"terminal_id":"t3","pane_id":"w2:p1","workspace_id":"w2","tab_id":"w2:t1",
+  "agent":"gemini","title":"scratch",
+  "agent_status":"idle","focused":false,"revision":2,"state_change_seq":1},
+ {"terminal_id":"t4","pane_id":"w2:p2","workspace_id":"w2","tab_id":"w2:t1",
+  "agent":"opencode","display_agent":"opencode","title":"",
+  "agent_status":"done","focused":false,"revision":5,"state_change_seq":6}
+]}}
+JSON
+        exit 0
+        ;;
+    esac
+    ;;
+  "agent focus")
+    printf 'focus %s\n' "${3:-}" >>"${HERD_STUB_LOG:-/dev/null}"
+    exit 0
+    ;;
+  *)
+    printf 'unsupported: %s\n' "$*" >&2
+    exit 1
+    ;;
+esac

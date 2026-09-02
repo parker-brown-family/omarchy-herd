@@ -26,6 +26,10 @@ the terminal window raised. Right-click the bar icon to go straight to whatever
 is waiting, without opening the tray at all. The whole thing leaves the bar when
 herdr is not running.
 
+![The Herd tray, with one agent blocked and one finished](docs/tray.png)
+
+![The bar icon, urgent because an agent is waiting](docs/bar.png)
+
 ## What it is not
 
 Omarchy already ships `omarchy.agents`, which is about **spend** — rate limits,
@@ -122,9 +126,75 @@ that event on transition, so it fires once per block rather than once per
 spinner frame. `done` stays silent on purpose: the chip already shows it, and a
 notification for every finished turn is noise.
 
+## What it runs
+
+A herdr plugin is ordinary code running as you, so here is all of it:
+
+- `herdr/herd-sync.sh` runs when herdr reports an agent event. It calls
+  `herdr agent list`, writes the result to
+  `~/.local/state/omarchy/herd/herd.json`, and calls `notify-send` when an
+  agent becomes blocked.
+- `herdr/herd-focus.sh` runs when you click. It calls `herdr agent focus`, and
+  `hyprctl dispatch` if you set `TERMINAL_CLASS`.
+- `Panel.qml` reads that one JSON file and runs `test -S` on herdr's socket
+  every three seconds to see whether herdr is still alive.
+
+Nothing else. No network, no telemetry, no daemon, and nothing written outside
+that one state directory and the config file you create yourself. `config.env`
+is parsed rather than sourced, so a stray line in it cannot become code.
+
+## Uninstall
+
+```bash
+herdr plugin uninstall brownfamilysports.herd
+```
+```bash
+omarchy plugin remove brownfamilysports.herd
+```
+```bash
+rm -rf ~/.local/state/omarchy/herd
+```
+
+## Troubleshooting
+
+**The icon is not on the bar.** It hides itself when herdr is not running —
+that is the intended behaviour, and `herdr session list` will tell you. If
+herdr is running, check that the widget is in your bar layout with
+`omarchy plugin list`, and that the socket path matches
+`herdr session list` if you use a named session.
+
+**The icon is there but the tray is empty.** The herdr half is probably not
+installed, or has not run yet. `herdr plugin list` should show
+`brownfamilysports.herd`, and `herdr plugin log list --plugin
+brownfamilysports.herd` shows whether its hooks are firing. The startup hook
+only runs when a herdr server starts, so reattach once after installing.
+
+**Clicking a row focuses the pane but does not raise the window.** Set
+`TERMINAL_CLASS` (see Settings). On Hyprland 0.56 and newer the old
+`hyprctl dispatch focuswindow` form no longer works; the plugin uses the Lua
+dispatcher and falls back, so this should just work — but a class that does not
+match any window is a silent no-op either way. `hyprctl clients` lists them.
+
+## Development
+
+```bash
+sh tests/run.sh
+```
+
+61 checks, no framework, and no herdr server or desktop session required —
+everything runs against stubs in `tests/stubs`. The parts that genuinely need a
+live herdr are the parts a test cannot honestly cover, and the suite does not
+pretend otherwise. CI additionally runs `shellcheck`, checks every script parses
+as POSIX `sh`, and deliberately breaks the pane-id validation to confirm the
+tests notice.
+
 ## Requirements
 
-Linux, Hyprland, `omarchy-shell`, herdr 0.7.0 or newer, and `jq`.
+Linux, Hyprland, `omarchy-shell`, herdr 0.7.5 or newer, and `jq`.
+
+herdr 0.7.5 is a real floor rather than a guess: `[[startup]]` hooks arrived in
+that release, and without one the tray stays empty after a restart until an
+agent happens to change state.
 
 ## License
 

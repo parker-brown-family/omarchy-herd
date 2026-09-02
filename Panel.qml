@@ -149,8 +149,15 @@ Panel {
 
   // ----------------------------------------------------------------- action
 
+  // Pane ids are herdr's opaque handles and look like w1:p1. This value reaches
+  // a command line, and the file it came from is written by another process, so
+  // it is checked here rather than trusted because it usually looks right.
+  function safeToken(value) {
+    return typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9:._-]*$/.test(value)
+  }
+
   function jumpTo(pane) {
-    if (!pane || !root.bar) return
+    if (!root.bar || !safeToken(pane)) return
     root.bar.run("sh '" + pluginDir + "/herdr/herd-focus.sh' '" + pane + "'")
     root.close()
   }

@@ -12,7 +12,11 @@ set -eu
 
 HERDR="${HERDR_BIN_PATH:-herdr}"
 STATE="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/herd/herd.json"
-CONFIG="${HERDR_PLUGIN_CONFIG_DIR:-}/config.env"
+# herdr sets HERDR_PLUGIN_CONFIG_DIR when it runs this as an action. The bar
+# panel calls the script directly with a pane argument, and gets no such
+# environment, so fall back to where herdr keeps that directory.
+CONFIG_DIR="${HERDR_PLUGIN_CONFIG_DIR:-$HOME/.config/herdr/plugins/config/brownfamilysports.herd}"
+CONFIG="$CONFIG_DIR/config.env"
 
 # TERMINAL_CLASS is the Hyprland class of the terminal that has herdr attached.
 # Set it in config.env to have the window raised as well as the pane focused —

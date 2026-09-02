@@ -3,15 +3,28 @@
 **Which coding agent needs you, on the Omarchy bar.**
 
 [herdr](https://herdr.dev) already knows which of your agents is blocked. Your
-desktop does not. Herd puts one chip on the Omarchy bar that says who is stuck,
-and one click that takes you there.
+desktop does not. Herd is one bar icon and one tray: the icon goes urgent the
+moment anything is waiting on you, and the tray says who.
 
 ```
-⏸ 1  ▶ 3
+Herd
+1 waiting on you · 2 working
+
+NEEDS YOU
+  ‖  claude · waiting on you
+     w2  refactor the detection manifests
+
+RUNNING
+  ▶  codex · working
+     w1  addev decision record
+  ▶  claude · working
+     w3  omarchy-herd
 ```
 
-One agent waiting on you, three still working. The chip goes urgent-coloured the
-moment anything blocks, and disappears entirely when herdr is not running.
+Every agent is a row you can act on. Click one and you land in that pane, with
+the terminal window raised. Right-click the bar icon to go straight to whatever
+is waiting, without opening the tray at all. The whole thing leaves the bar when
+herdr is not running.
 
 ## What it is not
 
@@ -68,8 +81,7 @@ In the Omarchy bar widget settings:
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| Hide when no agents are running | on | Leave the bar entirely rather than showing an empty chip |
-| Count idle agents | off | Idle agents need nothing, so they stay quiet by default |
+| Hide when no agents are running | on | Leave the bar entirely rather than showing an empty icon |
 | herdr socket path | *(session default)* | Point at a named session. `herdr session list` prints the path |
 
 To have the terminal **window** raised when you click through to a pane — not
@@ -87,12 +99,18 @@ Put `TERMINAL_CLASS=<your terminal's class>` in `config.env` in that directory.
 
 Badges match Terminal Delight's agent wall, so the two read alike.
 
-| Badge | herdr state | Meaning |
+The tray groups agents by what they want from you, and a group with nothing in
+it is not drawn at all.
+
+| Section | herdr state | Meaning |
 | --- | --- | --- |
-| ⏸ | `blocked` | Waiting on you — a permission prompt or a question |
-| ▶ | `working` | A turn is running |
-| ✓ | `done` | Finished, and you have not looked yet |
-| · | `idle` | At rest. Hidden unless you turn idle counting on |
+| NEEDS YOU | `blocked` | Waiting on you — a permission prompt or a question |
+| RUNNING | `working` | A turn is running |
+| FINISHED | `done` | Finished, and you have not looked yet |
+| IDLE | `idle` | At rest, wanting nothing |
+
+Each row spells its state out rather than leaving it to the badge, because
+"waiting on you" is the point and a glyph makes you translate it first.
 
 herdr has no error state; it folds rate limits and API failures into `unknown`.
 Herd does not invent one — unknown agents rest with idle.

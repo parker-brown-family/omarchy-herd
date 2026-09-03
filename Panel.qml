@@ -233,7 +233,15 @@ Panel {
     command: ["test", "-S", root.socketPath]
     onExited: function (exitCode) {
       root.serverUp = exitCode === 0
-      if (!root.serverUp) root.agents = []
+      if (!root.serverUp) {
+        root.agents = []
+        // lastText caches the text that produced the current `agents`, so any
+        // path that clears `agents` without going through parse() has to
+        // invalidate it too — otherwise the next read of a byte-identical file
+        // is skipped as unchanged and the tray stays empty while herdr is back
+        // up. onLoadFailed already does this; this is the other such path.
+        root.lastText = ""
+      }
     }
   }
 

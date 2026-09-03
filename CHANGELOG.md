@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- The tray no longer stays empty after herdr comes back up without republishing.
+  Losing the socket clears the agent list, and the cache that makes the
+  three-second re-read free was not cleared with it, so a byte-identical
+  snapshot afterwards was skipped as unchanged.
 - Clicking through to an agent now raises the terminal window hosting it, so
   Hyprland switches to the workspace herdr is on. Previously the jump focused
   the pane inside herdr and stopped there unless `TERMINAL_CLASS` was set in

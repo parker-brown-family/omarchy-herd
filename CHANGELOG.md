@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+- The bar icon no longer stays hidden when the plugin is installed into a
+  running Omarchy shell. The panel loads before the herdr half has created
+  `~/.local/state/omarchy/herd`, and a `FileView` created while its parent
+  directory is missing never sees the file appear — so `agents` stayed empty,
+  and with the default `hideWhenEmpty` the widget drew nothing and logged
+  nothing until the shell was restarted. The file is now re-read on the
+  three-second tick that already probes herdr's socket, and an unchanged
+  snapshot is dropped without touching any bindings.
+- Fixed a `TypeError` on every `refresh` IPC call: the handler called
+  `root.broadcast(...)`, which the Omarchy shell's `Panel` base class does not
+  define, so the call threw instead of refreshing.
+
 ## 0.1.0
 
 First release.

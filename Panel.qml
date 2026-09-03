@@ -191,17 +191,29 @@ Panel {
   // ------------------------------------------------------------------ state
 
   FileView {
+    id: stateFile
     path: root.stateDir + "/herd.json"
     watchChanges: true
     printErrors: false
     onFileChanged: reload()
     onLoaded: root.parse(text())
-    onLoadFailed: root.agents = []
+    onLoadFailed: {
+      root.lastText = ""
+      root.agents = []
+    }
   }
 
+  // The last content parsed, so the re-read on every tick is free when nothing
+  // has changed. Without it each tick would hand `agents` a new array and
+  // re-run every binding in the tray for no reason.
+  property string lastText: ""
+
   function parse(content) {
+    var raw = String(content || "")
+    if (raw === root.lastText) return
+    root.lastText = raw
     try {
-      var doc = JSON.parse(String(content || ""))
+      var doc = JSON.parse(raw)
       root.agents = (doc && Array.isArray(doc.agents)) ? doc.agents : []
     } catch (e) {
       console.warn("herd", "ignoring unreadable state file", e)
@@ -227,6 +239,24 @@ Panel {
 
   function refreshNow() {
     if (!liveness.running) liveness.running = true
+
+    // A FileView whose parent directory does not exist when it is created
+    // never sees the file appear. `watchChanges` copes with the file itself
+    // being absent — and with `mv -f` replacing it later — but it has nothing
+    // to attach to when the directory is missing too, and it does not retry.
+    //
+    // That is the normal install, not an edge case. The herdr half creates
+    // ~/.local/state/omarchy/herd and writes the first snapshot, and it does
+    // not run until a herdr server starts. Add the plugin to a running Omarchy
+    // shell and this panel loads minutes earlier, so the watch is dead on
+    // arrival: `agents` stays empty, and with the default `hideWhenEmpty` the
+    // widget draws nothing and logs nothing. It reads as a failed install, and
+    // only a shell restart clears it.
+    //
+    // Re-reading on the tick that already probes the socket costs a stat and a
+    // sub-kilobyte read every three seconds, and `parse` returns early when
+    // the content has not changed.
+    stateFile.reload()
   }
 
   Timer {
@@ -240,7 +270,7 @@ Panel {
   IpcHandler {
     target: "brownfamilysports.herd"
 
-    function refresh(): void { root.broadcast("refreshNow") }
+    function refresh(): void { root.refreshNow() }
     function open(): void { root.open() }
     function close(): void { root.close() }
     function toggle(): void { root.toggle() }

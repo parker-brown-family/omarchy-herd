@@ -169,6 +169,12 @@ installed, or has not run yet. `herdr plugin list` should show
 brownfamilysports.herd` shows whether its hooks are firing. The startup hook
 only runs when a herdr server starts, so reattach once after installing.
 
+This also used to happen on a fresh install, whichever order the two halves
+went in: the panel loaded before the herdr half had created the state
+directory, its watch had nothing to attach to, and the icon stayed hidden
+until the shell was restarted. The panel now re-reads the file on its own
+tick, so the install order no longer matters.
+
 **Clicking a row focuses the pane but does not raise the window.** Set
 `TERMINAL_CLASS` (see Settings). On Hyprland 0.56 and newer the old
 `hyprctl dispatch focuswindow` form no longer works; the plugin uses the Lua

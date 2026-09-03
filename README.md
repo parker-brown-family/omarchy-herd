@@ -88,16 +88,21 @@ In the Omarchy bar widget settings:
 | Hide when no agents are running | on | Leave the bar entirely rather than showing an empty icon |
 | herdr socket path | *(session default)* | Point at a named session. `herdr session list` prints the path |
 
-To have the terminal **window** raised when you click through to a pane — not
-just the pane focused inside a server nobody is looking at — set your terminal's
-Hyprland class:
+Clicking through to a pane raises the terminal **window** too, and Hyprland
+brings its workspace forward with it — no configuration needed. The window is
+found by walking up from the herdr client process to the first ancestor
+Hyprland owns, so it works whatever terminal you use.
+
+If that cannot reach your setup — a client attached over ssh, or a terminal
+Hyprland does not own — name the window's class instead:
 
 ```bash
 herdr plugin config-dir brownfamilysports.herd
 ```
 
-Put `TERMINAL_CLASS=<your terminal's class>` in `config.env` in that directory.
-`hyprctl clients` will tell you the class.
+Put `TERMINAL_CLASS=<your terminal's class>` in `config.env` in that directory;
+`hyprctl clients` will tell you the class. When it is set it wins outright, and
+the search is skipped.
 
 ## States
 
@@ -134,8 +139,9 @@ A herdr plugin is ordinary code running as you, so here is all of it:
   `herdr agent list`, writes the result to
   `~/.local/state/omarchy/herd/herd.json`, and calls `notify-send` when an
   agent becomes blocked.
-- `herdr/herd-focus.sh` runs when you click. It calls `herdr agent focus`, and
-  `hyprctl dispatch` if you set `TERMINAL_CLASS`.
+- `herdr/herd-focus.sh` runs when you click. It calls `herdr agent focus`, then
+  finds the Hyprland window hosting the herdr client — reading `hyprctl clients
+  -j` and climbing `/proc/<pid>/stat` — and raises it with `hyprctl dispatch`.
 - `Panel.qml` reads that one JSON file and runs `test -S` on herdr's socket
   every three seconds to see whether herdr is still alive.
 
@@ -175,11 +181,15 @@ directory, its watch had nothing to attach to, and the icon stayed hidden
 until the shell was restarted. The panel now re-reads the file on its own
 tick, so the install order no longer matters.
 
-**Clicking a row focuses the pane but does not raise the window.** Set
-`TERMINAL_CLASS` (see Settings). On Hyprland 0.56 and newer the old
-`hyprctl dispatch focuswindow` form no longer works; the plugin uses the Lua
-dispatcher and falls back, so this should just work — but a class that does not
-match any window is a silent no-op either way. `hyprctl clients` lists them.
+**Clicking a row focuses the pane but does not raise the window.** This used
+to need `TERMINAL_CLASS` set, and did nothing without it; the window is now
+found automatically. If it still does not move, check that `hyprctl
+clients -j` lists the terminal running herdr and that `pgrep -x herdr` finds
+the client, then set `TERMINAL_CLASS` (see Settings) to skip the search.
+
+On Hyprland 0.56 and newer the old `hyprctl dispatch focuswindow` form no
+longer works — it returns 7 with a Lua parse error rather than failing loudly.
+The plugin tries the Lua dispatcher first and falls back, so both are covered.
 
 ## Development
 

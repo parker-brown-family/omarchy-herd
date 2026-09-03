@@ -1,10 +1,30 @@
 #!/bin/sh
-# Records dispatch calls, and can pretend to be an older Hyprland.
+# Records dispatch calls, answers `clients -j`, and can pretend to be an older
+# Hyprland.
 #
 # HERD_STUB_HYPR=new  (default) the Lua dispatcher works
 # HERD_STUB_HYPR=old  the Lua form fails the way 0.55 and earlier do, so the
 #                     fallback path gets exercised
+#
+# `clients -j` reports a single window whose pid is HERD_STUB_WINPID and whose
+# address is HERD_STUB_WINADDR. With no HERD_STUB_WINPID it reports an empty
+# list, so a test that sets nothing exercises the no-window path.
 set -eu
+
+# Queries are not logged. The log is what tests assert focus behaviour on, and
+# it stays readable only while it holds dispatches alone.
+case "${1:-} ${2:-}" in
+  "clients -j")
+    if [ -n "${HERD_STUB_WINPID:-}" ]; then
+      printf '[{"class":"foot","pid":%s,"address":"%s"}]\n' \
+        "$HERD_STUB_WINPID" "${HERD_STUB_WINADDR:-0xabc123}"
+    else
+      printf '[]\n'
+    fi
+    exit 0
+    ;;
+esac
+
 printf '%s\n' "$*" >>"${HERD_STUB_LOG:-/dev/null}"
 
 case "${HERD_STUB_HYPR:-new}" in

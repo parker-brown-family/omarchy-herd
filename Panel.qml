@@ -252,11 +252,14 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    // A bell, and not a decorative choice: the bellwether is the sheep that
-    // wears one. It is also verified present in the bar's Nerd Font — the
-    // Font Awesome ranges are not, and an absent glyph leaves a blank slot
-    // on the bar with no error anywhere to explain it.
-    text: "󰂚"
+    // A sheep. A shepherd's crook would have been the better mark for a
+    // herd, and Nerd Fonts has no glyph for one — nothing under crook,
+    // crozier, shepherd or staff — so the animal stands in for the tool.
+    // md-sheep (U+F0CC6) is verified present in the bar's Nerd Font, which
+    // is what fc-match resolves `monospace` to. The Font Awesome ranges are
+    // not there, and an absent glyph leaves a blank slot on the bar with no
+    // error anywhere to explain it.
+    text: "󰳆"
     active: root.blocked > 0
     tooltipText: root.blocked > 0
       ? (root.blocked === 1 ? "1 agent is waiting on you"

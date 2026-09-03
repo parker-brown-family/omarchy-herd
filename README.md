@@ -47,7 +47,7 @@ herdr server
 herd-sync.sh  ──writes──▶  ~/.local/state/omarchy/herd/herd.json
                                       │  FileView
                                       ▼
-                            BarWidget.qml  (pure display)
+                            Panel.qml     (pure display)
 ```
 
 The herdr half subscribes to herdr's own events and writes a small JSON file.
@@ -56,7 +56,7 @@ The Omarchy half draws whatever appears in that file — the same shape
 writes. Neither half imports the other, and either one runs fine with the other
 missing.
 
-Content updates are event-driven, so the chip changes the instant an agent
+Content updates are event-driven, so the icon changes the instant an agent
 does. One thing is polled: whether herdr is alive at all. herdr removes its
 socket when the server stops, so a three-second `test -S` on that path is a
 truthful liveness check — and no event can report it, because the server that
@@ -123,7 +123,7 @@ Herd does not invent one — unknown agents rest with idle.
 
 One notification when an agent enters `blocked`, and nothing else. herdr emits
 that event on transition, so it fires once per block rather than once per
-spinner frame. `done` stays silent on purpose: the chip already shows it, and a
+spinner frame. `done` stays silent on purpose: the tray already shows it, and a
 notification for every finished turn is noise.
 
 ## What it runs

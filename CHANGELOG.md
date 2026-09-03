@@ -10,6 +10,9 @@
   nothing until the shell was restarted. The file is now re-read on the
   three-second tick that already probes herdr's socket, and an unchanged
   snapshot is dropped without touching any bindings.
+- Fixed a `TypeError` on every `refresh` IPC call: the handler called
+  `root.broadcast(...)`, which the Omarchy shell's `Panel` base class does not
+  define, so the call threw instead of refreshing.
 
 ## 0.1.0
 

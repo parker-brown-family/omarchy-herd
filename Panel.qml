@@ -270,7 +270,7 @@ Panel {
   IpcHandler {
     target: "brownfamilysports.herd"
 
-    function refresh(): void { root.broadcast("refreshNow") }
+    function refresh(): void { root.refreshNow() }
     function open(): void { root.open() }
     function close(): void { root.close() }
     function toggle(): void { root.toggle() }

@@ -48,6 +48,7 @@ sandbox() {
   export HOME XDG_STATE_HOME HERDR_BIN_PATH HERD_STUB_LOG HERD_NOTIFY_LOG \
          HERD_STUB_MODE HERD_STUB_HYPR
   unset HERDR_PLUGIN_EVENT_JSON HERDR_PLUGIN_CONFIG_DIR 2>/dev/null || true
+  unset HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR 2>/dev/null || true
   mkdir -p "$HOME"
   STATE_JSON="$XDG_STATE_HOME/omarchy/herd/herd.json"
 }
@@ -247,6 +248,99 @@ check_contains 'a malformed class is dropped, and focus still happens' 'focus w1
 case "$(stub_log)" in
   *hl.dsp*) fail 'a malformed class does not reach hyprctl' "it did: $(stub_log)" ;;
   *) pass 'a malformed class does not reach hyprctl' ;;
+esac
+
+unset HERDR_PLUGIN_CONFIG_DIR
+
+section 'herd-focus.sh — finding the window without configuration'
+
+# The pids below are real: HERD_STUB_PGREP stands in for the herdr client, and
+# the walk in herd-focus.sh climbs the runner's actual /proc ancestry, so these
+# exercise the real thing rather than a fabricated tree.
+
+sandbox
+sync
+HERD_STUB_PGREP="$$"
+HERD_STUB_WINPID="$$"
+HERD_STUB_WINADDR=0xfeed01
+export HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR
+focus
+check_contains 'raises the window hosting the herdr client' 'address:0xfeed01' "$(stub_log)"
+check_contains 'through the Lua dispatcher' 'hl.dsp.focus' "$(stub_log)"
+check_contains 'and still focuses the pane' 'focus w1:p1' "$(stub_log)"
+
+# A herdr client is a grandchild of its terminal, not a direct child, so the
+# walk has to climb. $PPID is a real ancestor of $$ and is not $$.
+sandbox
+sync
+HERD_STUB_PGREP="$$"
+HERD_STUB_WINPID="$PPID"
+HERD_STUB_WINADDR=0xfeed02
+export HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR
+focus
+check_contains 'climbing past intermediate processes to reach it' 'address:0xfeed02' "$(stub_log)"
+
+sandbox
+sync
+HERD_STUB_PGREP="$$"
+HERD_STUB_WINPID="$$"
+HERD_STUB_WINADDR=0xfeed03
+export HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR
+HERD_STUB_HYPR=old focus
+check_contains 'falling back to the legacy dispatcher on older Hyprland' 'focuswindow' "$(stub_log)"
+
+# pid 1 has no Hyprland window above it, the way herdr's own server does not.
+# Nothing may be raised on its behalf.
+sandbox
+sync
+HERD_STUB_PGREP=1
+HERD_STUB_WINPID="$$"
+HERD_STUB_WINADDR=0xfeed04
+export HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR
+focus
+check 'a client with no window above it raises nothing' 'focus w1:p1' "$(stub_log)"
+
+sandbox
+sync
+HERD_STUB_PGREP="$$"
+export HERD_STUB_PGREP
+focus
+check 'and neither does a compositor with no windows' 'focus w1:p1' "$(stub_log)"
+
+sandbox
+sync
+focus
+check 'nor does a session with no herdr client running' 'focus w1:p1' "$(stub_log)"
+
+# The address comes from hyprctl, but it still reaches a command line.
+sandbox
+sync
+HERD_STUB_PGREP="$$"
+HERD_STUB_WINPID="$$"
+# No whitespace in the payload on purpose: the address is read out of a
+# "pid address" line, so a value with a space in it would be split and the
+# valid prefix would sail through, testing nothing.
+HERD_STUB_WINADDR='0xfeed05;rm-rf/'
+export HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR
+focus
+check 'a malformed address never reaches hyprctl' 'focus w1:p1' "$(stub_log)"
+
+# An explicit class still wins, so setups the search cannot reach keep working.
+sandbox
+sync
+mkdir -p "$SANDBOX/cfg"
+HERDR_PLUGIN_CONFIG_DIR="$SANDBOX/cfg"
+export HERDR_PLUGIN_CONFIG_DIR
+printf 'TERMINAL_CLASS=kitty\n' >"$SANDBOX/cfg/config.env"
+HERD_STUB_PGREP="$$"
+HERD_STUB_WINPID="$$"
+HERD_STUB_WINADDR=0xfeed06
+export HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR
+focus
+check_contains 'a configured class overrides the search' 'class:kitty' "$(stub_log)"
+case "$(stub_log)" in
+  *address:*) fail 'and the search does not also run' "it did: $(stub_log)" ;;
+  *) pass 'and the search does not also run' ;;
 esac
 
 unset HERDR_PLUGIN_CONFIG_DIR

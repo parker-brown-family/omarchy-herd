@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Clicking through to an agent now raises the terminal window hosting it, so
+  Hyprland switches to the workspace herdr is on. Previously the jump focused
+  the pane inside herdr and stopped there unless `TERMINAL_CLASS` was set in
+  `config.env` — which nothing prompts you to do — so on a default install the
+  click moved herdr's focus somewhere you could not see and appeared to do
+  nothing at all. The window is found by walking up from the herdr client to
+  the first ancestor Hyprland owns, which needs no configuration and does not
+  care which terminal you use. `TERMINAL_CLASS` still works and still wins,
+  for clients the walk cannot reach.
+
 ## 0.1.0
 
 First release.

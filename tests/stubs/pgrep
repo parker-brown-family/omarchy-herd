@@ -1,0 +1,15 @@
+#!/bin/sh
+# Stand-in for pgrep. Reports the pids in HERD_STUB_PGREP, one per line, and
+# exits 1 when there are none, the way the real pgrep does on no match.
+#
+# The pids a test puts there are real ones — usually the test runner's own, so
+# that the ancestor walk in herd-focus.sh runs against a real /proc tree
+# instead of a fabricated one.
+set -eu
+
+[ -n "${HERD_STUB_PGREP:-}" ] || exit 1
+
+# shellcheck disable=SC2086  # splitting the list is the point
+for p in $HERD_STUB_PGREP; do
+  printf '%s\n' "$p"
+done

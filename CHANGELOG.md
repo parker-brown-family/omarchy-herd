@@ -12,6 +12,12 @@
   `omarchy-crook`. An installed copy of the old name is not upgraded in place:
   remove `brownfamilysports.herd` from both halves, install this one, and
   delete `~/.local/state/omarchy/herd`.
+- The bar icon is a shepherd's crook, drawn as a path rather than borrowed from
+  a font. A sheep glyph stood in while the plugin was called Herd, because Nerd
+  Fonts ships no crook under any name — but the flock belongs to the bus now,
+  and the tool that singles one out of it is what this plugin is. It takes the
+  bar's colour, goes urgent with the button, and stays legible down to 18px.
+
 - The tray no longer stays empty after herdr comes back up without republishing.
   Losing the socket clears the agent list, and the cache that makes the
   three-second re-read free was not cleared with it, so a byte-identical

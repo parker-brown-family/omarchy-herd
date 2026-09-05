@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import qs.Commons
@@ -290,15 +291,18 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    // A sheep. The plugin is named for the shepherd's crook and the crook
-    // is what the icon should be, but Nerd Fonts has no glyph for one —
-    // nothing under crook, crozier, shepherd or staff — so the flock stands
-    // in for the tool that singles one out of it.
-    // md-sheep (U+F0CC6) is verified present in the bar's Nerd Font, which
-    // is what fc-match resolves `monospace` to. The Font Awesome ranges are
-    // not there, and an absent glyph leaves a blank slot on the bar with no
-    // error anywhere to explain it.
-    text: "󰳆"
+    // The crook itself, drawn rather than borrowed. A sheep glyph stood here
+    // first, because Nerd Fonts has no crook — nothing under crook, crozier,
+    // shepherd or staff — and an absent glyph leaves a blank slot on the bar
+    // with no error anywhere to explain it. But the flock is Herd's name, not
+    // this plugin's, and an icon naming the wrong half of the family is worse
+    // than one that costs twelve lines of path data.
+    //
+    // BarIconButton takes an `iconComponent` in place of its glyph, so the
+    // shape sits in the same optically-centred canvas a glyph would, at the
+    // same size, in the same colour — and it goes urgent with the button
+    // rather than needing a rule of its own.
+    iconComponent: crookIcon
     active: root.blocked > 0
     tooltipText: root.blocked > 0
       ? (root.blocked === 1 ? "1 agent is waiting on you"
@@ -309,6 +313,27 @@ Panel {
       // the agent that is waiting, without reading the tray first.
       if (buttonCode === Qt.RightButton && root.blocked > 0) root.jumpTo(root.ordered[0].pane)
       else root.toggle()
+    }
+  }
+
+  // A 24x24 box: shaft up from the bottom, one wide arc over the top, and a
+  // tighter one curling back inside it — the tuck that separates a crook from
+  // a walking stick. Round caps, because a flat cut reads as a pipe. Checked
+  // legible down to 18px, which is below any bar height.
+  Component {
+    id: crookIcon
+    Shape {
+      id: crookShape
+      anchors.fill: parent
+      preferredRendererType: Shape.CurveRenderer
+      ShapePath {
+        strokeColor: button.active && button.useActiveColor ? button.activeColor : button.foreground
+        strokeWidth: Math.max(1, crookShape.width / 10)
+        capStyle: ShapePath.RoundCap
+        fillColor: "transparent"
+        scale: Qt.size(crookShape.width / 24, crookShape.height / 24)
+        PathSvg { path: "M14.5,21 V10.5 A4.6,4.6 0 0 0 5.3,10.5 A2.3,2.3 0 0 0 9.9,10.5" }
+      }
     }
   }
 

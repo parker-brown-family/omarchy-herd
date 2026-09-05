@@ -1,6 +1,6 @@
 id = "brownfamilysports.crook"
 name = "Crook"
-version = "0.1.0"
+version = "0.2.0"
 # 0.7.5, not 0.7.0: plugin v1 landed in 0.7.0, but the [[startup]] hook this
 # plugin needs to publish its first snapshot arrived in 0.7.5. On 0.7.0-0.7.4
 # the manifest would link and the bar would stay empty until an agent happened

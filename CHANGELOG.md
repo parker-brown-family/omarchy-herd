@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 — 2026-09-05
 
 - Renamed from Herd to **Crook**, which is what it always was: the shepherd's
   hook, the tool for singling one animal out of the flock. The name Herd has

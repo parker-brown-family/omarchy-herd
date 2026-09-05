@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "id": "brownfamilysports.herd",
-  "name": "Herd",
+  "id": "brownfamilysports.crook",
+  "name": "Crook",
   "version": "0.1.0",
   "author": "Parker Brown",
   "license": "MIT",
@@ -11,7 +11,7 @@
     "barWidget": "Panel.qml"
   },
   "barWidget": {
-    "displayName": "Herd",
+    "displayName": "Crook",
     "description": "One bar icon and one tray: every agent herdr is running, the ones waiting on you first, and a click that jumps to the stuck one.",
     "category": "AI",
     "allowMultiple": false,

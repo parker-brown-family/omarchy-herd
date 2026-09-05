@@ -30,7 +30,7 @@ case "${1:-} ${2:-}" in
         cat <<'JSON'
 {"id":"cli:agent:list","result":{"type":"agent_list","agents":[
  {"terminal_id":"t1","pane_id":"w1:p1","workspace_id":"w1","tab_id":"w1:t1",
-  "agent":"claude","display_agent":"Claude Code","title":"omarchy-herd",
+  "agent":"claude","display_agent":"Claude Code","title":"omarchy-crook",
   "agent_status":"blocked","focused":false,"revision":7,"state_change_seq":3},
  {"terminal_id":"t2","pane_id":"w1:p2","workspace_id":"w1","tab_id":"w1:t1",
   "agent":"codex","display_agent":"Codex","title":"addev docs",

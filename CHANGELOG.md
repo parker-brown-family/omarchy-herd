@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Renamed from Herd to **Crook**, which is what it always was: the shepherd's
+  hook, the tool for singling one animal out of the flock. The name Herd has
+  moved to the state bus this family of plugins reads from, where the flock
+  itself lives. Nothing about the behaviour changed, but every name did — the
+  plugin id is now `brownfamilysports.crook`, the herdr half sits under
+  `crook/` as `crook-sync.sh` and `crook-focus.sh`, the state file is
+  `~/.local/state/omarchy/crook/crook.json`, and the repository is
+  `omarchy-crook`. An installed copy of the old name is not upgraded in place:
+  remove `brownfamilysports.herd` from both halves, install this one, and
+  delete `~/.local/state/omarchy/herd`.
 - The tray no longer stays empty after herdr comes back up without republishing.
   Losing the socket clears the agent list, and the cache that makes the
   three-second re-read free was not cleared with it, so a byte-identical
@@ -17,7 +27,7 @@
   for clients the walk cannot reach.
 - The bar icon no longer stays hidden when the plugin is installed into a
   running Omarchy shell. The panel loads before the herdr half has created
-  `~/.local/state/omarchy/herd`, and a `FileView` created while its parent
+  `~/.local/state/omarchy/crook`, and a `FileView` created while its parent
   directory is missing never sees the file appear — so `agents` stayed empty,
   and with the default `hideWhenEmpty` the widget drew nothing and logged
   nothing until the shell was restarted. The file is now re-read on the

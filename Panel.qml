@@ -10,21 +10,21 @@ import qs.Ui
 // Same blind spot the first-party panels hit; every other check still runs.
 // qmllint disable uncreatable-type missing-property unqualified
 
-// Herd — the attention surface. Which agent under herdr needs you.
+// Crook — the attention surface. Which agent under herdr needs you.
 //
 // One bar icon and one tray. The icon says whether anything is waiting on you;
 // the tray says who, and clicking a row takes you there. Counts alone were the
 // first attempt and were wrong: a chip reading "2 blocked" is a status line,
 // not somewhere you can act, and at bar size it is unreadable besides.
 //
-// This file is a pure display. The other half of the plugin (herdr/) subscribes
-// to herdr's own events and writes ~/.local/state/omarchy/herd/herd.json; this
+// This file is a pure display. The other half of the plugin (crook/) subscribes
+// to herdr's own events and writes ~/.local/state/omarchy/crook/crook.json; this
 // panel draws whatever appears there, the same way omarchy.agents draws the
 // records omarchy-agent-usage-update writes. Neither half imports the other.
 Panel {
   id: root
-  moduleName: "brownfamilysports.herd"
-  ipcTarget: "brownfamilysports.herd"
+  moduleName: "brownfamilysports.crook"
+  ipcTarget: "brownfamilysports.crook"
   manageIpc: false
 
   readonly property color foreground: bar ? bar.foreground : Color.foreground
@@ -34,14 +34,14 @@ Panel {
 
   readonly property string home: Quickshell.env("HOME") || ""
   readonly property string stateDir:
-    (Quickshell.env("XDG_STATE_HOME") || (home + "/.local/state")) + "/omarchy/herd"
+    (Quickshell.env("XDG_STATE_HOME") || (home + "/.local/state")) + "/omarchy/crook"
   readonly property string configuredSocket: setting("socketPath", "")
   readonly property string socketPath:
     configuredSocket !== "" ? configuredSocket : home + "/.config/herdr/herdr.sock"
   readonly property bool hideWhenEmpty: setting("hideWhenEmpty", true)
 
   // Where this plugin was installed. `omarchy plugin add` clones the whole
-  // repository, so the herdr half sits under herdr/ right here — no second
+  // repository, so the herdr half sits under crook/ right here — no second
   // path to configure, and no guess at the install directory's name.
   readonly property string pluginDir: {
     var u = Qt.resolvedUrl(".").toString()
@@ -158,7 +158,7 @@ Panel {
 
   function jumpTo(pane) {
     if (!root.bar || !safeToken(pane)) return
-    root.bar.run("sh '" + pluginDir + "/herdr/herd-focus.sh' '" + pane + "'")
+    root.bar.run("sh '" + pluginDir + "/crook/crook-focus.sh' '" + pane + "'")
     root.close()
   }
 
@@ -192,7 +192,7 @@ Panel {
 
   FileView {
     id: stateFile
-    path: root.stateDir + "/herd.json"
+    path: root.stateDir + "/crook.json"
     watchChanges: true
     printErrors: false
     onFileChanged: reload()
@@ -216,7 +216,7 @@ Panel {
       var doc = JSON.parse(raw)
       root.agents = (doc && Array.isArray(doc.agents)) ? doc.agents : []
     } catch (e) {
-      console.warn("herd", "ignoring unreadable state file", e)
+      console.warn("crook", "ignoring unreadable state file", e)
       root.agents = []
     }
   }
@@ -254,7 +254,7 @@ Panel {
     // to attach to when the directory is missing too, and it does not retry.
     //
     // That is the normal install, not an edge case. The herdr half creates
-    // ~/.local/state/omarchy/herd and writes the first snapshot, and it does
+    // ~/.local/state/omarchy/crook and writes the first snapshot, and it does
     // not run until a herdr server starts. Add the plugin to a running Omarchy
     // shell and this panel loads minutes earlier, so the watch is dead on
     // arrival: `agents` stays empty, and with the default `hideWhenEmpty` the
@@ -276,7 +276,7 @@ Panel {
   }
 
   IpcHandler {
-    target: "brownfamilysports.herd"
+    target: "brownfamilysports.crook"
 
     function refresh(): void { root.refreshNow() }
     function open(): void { root.open() }
@@ -290,9 +290,10 @@ Panel {
     id: button
     anchors.fill: parent
     bar: root.bar
-    // A sheep. A shepherd's crook would have been the better mark for a
-    // herd, and Nerd Fonts has no glyph for one — nothing under crook,
-    // crozier, shepherd or staff — so the animal stands in for the tool.
+    // A sheep. The plugin is named for the shepherd's crook and the crook
+    // is what the icon should be, but Nerd Fonts has no glyph for one —
+    // nothing under crook, crozier, shepherd or staff — so the flock stands
+    // in for the tool that singles one out of it.
     // md-sheep (U+F0CC6) is verified present in the bar's Nerd Font, which
     // is what fc-match resolves `monospace` to. The Font Awesome ranges are
     // not there, and an absent glyph leaves a blank slot on the bar with no
@@ -351,7 +352,7 @@ Panel {
 
           PanelHero {
             width: parent.width
-            title: "Herd"
+            title: "Crook"
             meta: root.heroMeta
             foreground: root.foreground
             fontFamily: root.fontFamily

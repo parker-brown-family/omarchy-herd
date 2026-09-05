@@ -3,7 +3,7 @@
 # exits 1 when there are none, the way the real pgrep does on no match.
 #
 # The pids a test puts there are real ones — usually the test runner's own, so
-# that the ancestor walk in herd-focus.sh runs against a real /proc tree
+# that the ancestor walk in crook-focus.sh runs against a real /proc tree
 # instead of a fabricated one.
 set -eu
 

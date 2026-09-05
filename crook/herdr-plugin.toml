@@ -1,5 +1,5 @@
-id = "brownfamilysports.herd"
-name = "Herd"
+id = "brownfamilysports.crook"
+name = "Crook"
 version = "0.1.0"
 # 0.7.5, not 0.7.0: plugin v1 landed in 0.7.0, but the [[startup]] hook this
 # plugin needs to publish its first snapshot arrived in 0.7.5. On 0.7.0-0.7.4
@@ -13,26 +13,26 @@ platforms = ["linux"]
 # during `herdr update`. Without this the bar would show whatever the last
 # server left behind until the next status change happened to fire.
 [[startup]]
-command = ["sh", "herd-sync.sh"]
+command = ["sh", "crook-sync.sh"]
 
 [[events]]
 on = "pane.agent_status_changed"
-command = ["sh", "herd-sync.sh"]
+command = ["sh", "crook-sync.sh"]
 
 [[events]]
 on = "pane.agent_detected"
-command = ["sh", "herd-sync.sh"]
+command = ["sh", "crook-sync.sh"]
 
 [[events]]
 on = "pane.exited"
-command = ["sh", "herd-sync.sh"]
+command = ["sh", "crook-sync.sh"]
 
 [[events]]
 on = "pane.closed"
-command = ["sh", "herd-sync.sh"]
+command = ["sh", "crook-sync.sh"]
 
 [[actions]]
 id = "focus-blocked"
 title = "Focus the blocked agent"
 contexts = ["workspace"]
-command = ["sh", "herd-focus.sh"]
+command = ["sh", "crook-focus.sh"]

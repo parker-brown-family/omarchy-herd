@@ -1,5 +1,5 @@
 #!/bin/sh
-# Herd's test suite. POSIX sh, no framework, one dependency (jq) that the
+# Crook's test suite. POSIX sh, no framework, one dependency (jq) that the
 # plugin itself already needs.
 #
 #   tests/run.sh
@@ -50,18 +50,18 @@ sandbox() {
   unset HERDR_PLUGIN_EVENT_JSON HERDR_PLUGIN_CONFIG_DIR 2>/dev/null || true
   unset HERD_STUB_PGREP HERD_STUB_WINPID HERD_STUB_WINADDR 2>/dev/null || true
   mkdir -p "$HOME"
-  STATE_JSON="$XDG_STATE_HOME/omarchy/herd/herd.json"
+  STATE_JSON="$XDG_STATE_HOME/omarchy/crook/crook.json"
 }
 
-sync() { sh "$ROOT/herdr/herd-sync.sh"; }
-focus() { sh "$ROOT/herdr/herd-focus.sh" "$@"; }
+sync() { sh "$ROOT/crook/crook-sync.sh"; }
+focus() { sh "$ROOT/crook/crook-focus.sh" "$@"; }
 
 notify_count() { [ -f "$HERD_NOTIFY_LOG" ] && wc -l <"$HERD_NOTIFY_LOG" | tr -d ' ' || echo 0; }
 stub_log() { [ -f "$HERD_STUB_LOG" ] && cat "$HERD_STUB_LOG" || printf ''; }
 
-# ---------------------------------------------------------------- herd-sync
+# ---------------------------------------------------------------- crook-sync
 
-section 'herd-sync.sh'
+section 'crook-sync.sh'
 
 sandbox
 sync
@@ -75,11 +75,11 @@ check 'defaults a missing title to empty, not null' '' \
   "$(jq -r '.agents[] | select(.pane == "w2:p2") | .title' "$STATE_JSON")"
 check 'stamps the snapshot' 'number' "$(jq -r '.stamp | type' "$STATE_JSON")"
 check 'leaves no temporary file behind' '0' \
-  "$(find "$XDG_STATE_HOME/omarchy/herd" -name 'herd.json.tmp*' | wc -l | tr -d ' ')"
+  "$(find "$XDG_STATE_HOME/omarchy/crook" -name 'crook.json.tmp*' | wc -l | tr -d ' ')"
 
 sandbox
 HERD_STUB_MODE=down sync
-check 'a stopped server publishes an empty herd, not a stale one' '0' \
+check 'a stopped server publishes an empty agent list, not a stale one' '0' \
   "$(jq '.agents | length' "$STATE_JSON")"
 
 sandbox
@@ -90,10 +90,10 @@ check 'unparseable output still leaves valid json' '0' \
 sandbox
 sync
 HERD_STUB_MODE=down sync
-check 'a herd that empties is republished, not left behind' '0' \
+check 'an agent list that empties is republished, not left behind' '0' \
   "$(jq '.agents | length' "$STATE_JSON")"
 
-section 'herd-sync.sh — notifications'
+section 'crook-sync.sh — notifications'
 
 sandbox
 sync
@@ -110,7 +110,7 @@ HERDR_PLUGIN_EVENT_JSON='{"pane_id":"w1:p1","agent_status":"done","display_agent
 check 'a finished agent stays silent' '0' "$(notify_count)"
 
 sandbox
-HERDR_PLUGIN_EVENT_JSON='{"pane_id":"w1:p1","agent_status":"blocked","display_agent":"Claude Code","title":"omarchy-herd"}' \
+HERDR_PLUGIN_EVENT_JSON='{"pane_id":"w1:p1","agent_status":"blocked","display_agent":"Claude Code","title":"omarchy-crook"}' \
   sync
 check 'a blocked agent rings once' '1' "$(notify_count)"
 check_contains 'the notification names the agent' 'Claude Code needs you' "$(cat "$HERD_NOTIFY_LOG")"
@@ -144,21 +144,21 @@ HERD_NOTIFY_REPEAT_SECONDS=0 HERDR_PLUGIN_EVENT_JSON="$E" sync
 HERD_NOTIFY_REPEAT_SECONDS=0 HERDR_PLUGIN_EVENT_JSON="$E" sync
 check 'the repeat window is what suppresses it, and it is configurable' '2' "$(notify_count)"
 
-section 'herd-sync.sh — concurrency'
+section 'crook-sync.sh — concurrency'
 
 sandbox
 if command -v flock >/dev/null 2>&1; then
   # Hold the lock, then run a sync: it must mark the work dirty and leave
   # rather than block or fail.
-  mkdir -p "$XDG_STATE_HOME/omarchy/herd"
-  ( flock 9; sleep 2 ) 9>"$XDG_STATE_HOME/omarchy/herd/.lock" &
+  mkdir -p "$XDG_STATE_HOME/omarchy/crook"
+  ( flock 9; sleep 2 ) 9>"$XDG_STATE_HOME/omarchy/crook/.lock" &
   HOLDER=$!
   sleep 1
   sync
   RC=$?
   check 'a second sync exits cleanly while one is running' '0' "$RC"
   check 'and leaves the work marked dirty' '1' \
-    "$([ -e "$XDG_STATE_HOME/omarchy/herd/.dirty" ] && echo 1 || echo 0)"
+    "$([ -e "$XDG_STATE_HOME/omarchy/crook/.dirty" ] && echo 1 || echo 0)"
   wait "$HOLDER" 2>/dev/null || true
 else
   printf '  skip flock unavailable\n'
@@ -169,9 +169,9 @@ HERD_MAX_PASSES=2 sync
 check 'the coalesce loop is bounded and still publishes' '4' \
   "$(jq '.agents | length' "$STATE_JSON")"
 
-# --------------------------------------------------------------- herd-focus
+# --------------------------------------------------------------- crook-focus
 
-section 'herd-focus.sh'
+section 'crook-focus.sh'
 
 sandbox
 sync
@@ -206,7 +206,7 @@ sync
 focus '$(whoami)'
 check 'and so is a substitution attempt' '' "$(stub_log)"
 
-section 'herd-focus.sh — raising the window'
+section 'crook-focus.sh — raising the window'
 
 sandbox
 sync
@@ -252,10 +252,10 @@ esac
 
 unset HERDR_PLUGIN_CONFIG_DIR
 
-section 'herd-focus.sh — finding the window without configuration'
+section 'crook-focus.sh — finding the window without configuration'
 
 # The pids below are real: HERD_STUB_PGREP stands in for the herdr client, and
-# the walk in herd-focus.sh climbs the runner's actual /proc ancestry, so these
+# the walk in crook-focus.sh climbs the runner's actual /proc ancestry, so these
 # exercise the real thing rather than a fabricated tree.
 
 sandbox
@@ -358,7 +358,7 @@ ENTRY=$(jq -r '.entryPoints.barWidget' "$M")
 check 'its bar widget entry point exists' '1' "$([ -f "$ROOT/$ENTRY" ] && echo 1 || echo 0)"
 check 'it declares the bar-widget kind' 'true' "$(jq '.kinds | index("bar-widget") != null' "$M")"
 
-T="$ROOT/herdr/herdr-plugin.toml"
+T="$ROOT/crook/herdr-plugin.toml"
 
 # The package keys live above the first [[table]]; `id` also appears inside
 # [[actions]], so reading the whole file would compare the wrong one.
@@ -396,13 +396,13 @@ check 'every subscribed event is one herdr delivers to plugins' '' "$UNKNOWN"
 # an empty list would pass while proving nothing.
 check 'and the events were actually read from the manifest' '4' "$SUBSCRIBED"
 
-for s in herd-sync.sh herd-focus.sh; do
-  check "$s is executable" '1' "$([ -x "$ROOT/herdr/$s" ] && echo 1 || echo 0)"
+for s in crook-sync.sh crook-focus.sh; do
+  check "$s is executable" '1' "$([ -x "$ROOT/crook/$s" ] && echo 1 || echo 0)"
 done
 MISSING=''
 # shellcheck disable=SC2013  # script names cannot contain whitespace; splitting is the point
 for cmd in $(sed -n 's/^command[[:space:]]*=[[:space:]]*\["sh",[[:space:]]*"\(.*\)"\]/\1/p' "$T"); do
-  [ -f "$ROOT/herdr/$cmd" ] || MISSING="$MISSING $cmd"
+  [ -f "$ROOT/crook/$cmd" ] || MISSING="$MISSING $cmd"
 done
 check 'every script the manifest names is present' '' "$MISSING"
 

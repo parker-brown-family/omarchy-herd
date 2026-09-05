@@ -4,14 +4,14 @@
 # Runs from herdr's [[events]] hooks, so it is a short-lived process fired on
 # change — never a daemon, never a poll. It writes one file:
 #
-#   ${XDG_STATE_HOME:-~/.local/state}/omarchy/herd/herd.json
+#   ${XDG_STATE_HOME:-~/.local/state}/omarchy/crook/crook.json
 #
 # and, when an agent has just become blocked, one notification.
 set -eu
 
 HERDR="${HERDR_BIN_PATH:-herdr}"
-STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/herd"
-OUT="$STATE_DIR/herd.json"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/crook"
+OUT="$STATE_DIR/crook.json"
 LOCK="$STATE_DIR/.lock"
 DIRTY="$STATE_DIR/.dirty"
 NOTIFIED="$STATE_DIR/.notified"
@@ -43,7 +43,7 @@ publish() {
   if raw=$("$HERDR" agent list 2>/dev/null); then
     :
   else
-    # No server, or it went away mid-call. Publish an empty herd rather than
+    # No server, or it went away mid-call. Publish an empty crook rather than
     # leaving the bar showing agents that no longer exist.
     raw=''
   fi
@@ -125,7 +125,7 @@ notify_blocked() {
   [ -n "$who" ] || who="An agent"
   what=$(event_field title)
 
-  notify-send -a herd -u normal "$who needs you" "$what" 2>/dev/null || true
+  notify-send -a crook -u normal "$who needs you" "$what" 2>/dev/null || true
 }
 
 # ---------------------------------------------------------------------- main

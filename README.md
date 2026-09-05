@@ -1,13 +1,14 @@
-# Herd
+# Crook
 
 **Which coding agent needs you, on the Omarchy bar.**
 
-[herdr](https://herdr.dev) already knows which of your agents is blocked. Your
-desktop does not. Herd is one bar icon and one tray: the icon goes urgent the
+A shepherd's crook is the tool for singling one animal out of a flock, which is
+the whole job here. [herdr](https://herdr.dev) already knows which of your
+agents is blocked; your desktop does not. Crook is one bar icon and one tray: the icon goes urgent the
 moment anything is waiting on you, and the tray says who.
 
 ```
-Herd
+Crook
 1 waiting on you · 2 working
 
 NEEDS YOU
@@ -18,7 +19,7 @@ RUNNING
   ▶  codex · working
      w1  addev decision record
   ▶  claude · working
-     w3  omarchy-herd
+     w3  omarchy-crook
 ```
 
 Every agent is a row you can act on. Click one and you land in that pane, with
@@ -26,14 +27,14 @@ the terminal window raised. Right-click the bar icon to go straight to whatever
 is waiting, without opening the tray at all. The whole thing leaves the bar when
 herdr is not running.
 
-![The Herd tray, with one agent blocked and one finished](docs/tray.png)
+![The Crook tray, with one agent blocked and one finished](docs/tray.png)
 
 ![The bar icon, urgent because an agent is waiting](docs/bar.png)
 
 ## What it is not
 
 Omarchy already ships `omarchy.agents`, which is about **spend** — rate limits,
-token meters, pace. Herd is about **attention**. They sit next to each other and
+token meters, pace. Crook is about **attention**. They sit next to each other and
 answer different questions.
 
 ## How it works
@@ -44,7 +45,7 @@ Two halves, one file, no daemon.
 herdr server
     │  [[events]] pane.agent_status_changed
     ▼
-herd-sync.sh  ──writes──▶  ~/.local/state/omarchy/herd/herd.json
+crook-sync.sh  ──writes──▶  ~/.local/state/omarchy/crook/crook.json
                                       │  FileView
                                       ▼
                             Panel.qml     (pure display)
@@ -67,13 +68,13 @@ would have sent one is the thing that went away.
 Both halves, from this one repository.
 
 ```bash
-omarchy plugin add https://github.com/parker-brown-family/omarchy-herd.git --enable
+omarchy plugin add https://github.com/parker-brown-family/omarchy-crook.git --enable
 ```
 ```bash
-herdr plugin install parker-brown-family/omarchy-herd/herdr
+herdr plugin install parker-brown-family/omarchy-crook/crook
 ```
 ```bash
-omarchy bar move brownfamilysports.herd --section right
+omarchy bar move brownfamilysports.crook --section right
 ```
 
 Restart or reattach herdr once so the plugin's startup hook runs and publishes
@@ -97,7 +98,7 @@ If that cannot reach your setup — a client attached over ssh, or a terminal
 Hyprland does not own — name the window's class instead:
 
 ```bash
-herdr plugin config-dir brownfamilysports.herd
+herdr plugin config-dir brownfamilysports.crook
 ```
 
 Put `TERMINAL_CLASS=<your terminal's class>` in `config.env` in that directory;
@@ -122,7 +123,7 @@ Each row spells its state out rather than leaving it to the badge, because
 "waiting on you" is the point and a glyph makes you translate it first.
 
 herdr has no error state; it folds rate limits and API failures into `unknown`.
-Herd does not invent one — unknown agents rest with idle.
+Crook does not invent one — unknown agents rest with idle.
 
 ## Notifications
 
@@ -135,11 +136,11 @@ notification for every finished turn is noise.
 
 A herdr plugin is ordinary code running as you, so here is all of it:
 
-- `herdr/herd-sync.sh` runs when herdr reports an agent event. It calls
+- `crook/crook-sync.sh` runs when herdr reports an agent event. It calls
   `herdr agent list`, writes the result to
-  `~/.local/state/omarchy/herd/herd.json`, and calls `notify-send` when an
+  `~/.local/state/omarchy/crook/crook.json`, and calls `notify-send` when an
   agent becomes blocked.
-- `herdr/herd-focus.sh` runs when you click. It calls `herdr agent focus`, then
+- `crook/crook-focus.sh` runs when you click. It calls `herdr agent focus`, then
   finds the Hyprland window hosting the herdr client — reading `hyprctl clients
   -j` and climbing `/proc/<pid>/stat` — and raises it with `hyprctl dispatch`.
 - `Panel.qml` reads that one JSON file and runs `test -S` on herdr's socket
@@ -152,13 +153,13 @@ is parsed rather than sourced, so a stray line in it cannot become code.
 ## Uninstall
 
 ```bash
-herdr plugin uninstall brownfamilysports.herd
+herdr plugin uninstall brownfamilysports.crook
 ```
 ```bash
-omarchy plugin remove brownfamilysports.herd
+omarchy plugin remove brownfamilysports.crook
 ```
 ```bash
-rm -rf ~/.local/state/omarchy/herd
+rm -rf ~/.local/state/omarchy/crook
 ```
 
 ## Troubleshooting
@@ -171,8 +172,8 @@ herdr is running, check that the widget is in your bar layout with
 
 **The icon is there but the tray is empty.** The herdr half is probably not
 installed, or has not run yet. `herdr plugin list` should show
-`brownfamilysports.herd`, and `herdr plugin log list --plugin
-brownfamilysports.herd` shows whether its hooks are firing. The startup hook
+`brownfamilysports.crook`, and `herdr plugin log list --plugin
+brownfamilysports.crook` shows whether its hooks are firing. The startup hook
 only runs when a herdr server starts, so reattach once after installing.
 
 This also used to happen on a fresh install, whichever order the two halves
@@ -197,7 +198,7 @@ The plugin tries the Lua dispatcher first and falls back, so both are covered.
 sh tests/run.sh
 ```
 
-61 checks, no framework, and no herdr server or desktop session required —
+72 checks, no framework, and no herdr server or desktop session required —
 everything runs against stubs in `tests/stubs`. The parts that genuinely need a
 live herdr are the parts a test cannot honestly cover, and the suite does not
 pretend otherwise. CI additionally runs `shellcheck`, checks every script parses

@@ -4,7 +4,7 @@
 # Invoked as the `focus-blocked` action — from the bar icon, from a keybinding,
 # or by hand:
 #
-#   herdr plugin action invoke brownfamilysports.herd.focus-blocked
+#   herdr plugin action invoke brownfamilysports.crook.focus-blocked
 #
 # With no argument it picks the first blocked agent, then the first finished
 # one. Pass a pane id to target one directly; the tray does that when you click
@@ -12,12 +12,12 @@
 set -eu
 
 HERDR="${HERDR_BIN_PATH:-herdr}"
-STATE="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/herd/herd.json"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/crook/crook.json"
 
 # herdr sets HERDR_PLUGIN_CONFIG_DIR when it runs this as an action. The bar
 # panel calls the script directly with a pane argument, and gets no such
 # environment, so fall back to where herdr keeps that directory.
-CONFIG_DIR="${HERDR_PLUGIN_CONFIG_DIR:-$HOME/.config/herdr/plugins/config/brownfamilysports.herd}"
+CONFIG_DIR="${HERDR_PLUGIN_CONFIG_DIR:-$HOME/.config/herdr/plugins/config/brownfamilysports.crook}"
 CONFIG="$CONFIG_DIR/config.env"
 
 # Read one key out of config.env rather than sourcing the file. It lives in a
